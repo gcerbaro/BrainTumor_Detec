@@ -30,3 +30,8 @@ build:
 client:
 	@echo "Iniciando cliente (frontend)..."
 	$(PYTHON) -m http.server 3000 -d ./client/latest
+
+clean:
+	@echo "Limpando cache da API..."
+	@rm -rf .cache
+	@echo "Cache eliminado com sucesso!"
