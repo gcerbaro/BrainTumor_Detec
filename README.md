@@ -23,3 +23,6 @@ $ make client
 A aplicação deve estar acessível no endereço: http://localhost:3000
 
 <img width="2560" height="1608" alt="localhost_3000_" src="https://github.com/user-attachments/assets/96906ec5-fdee-424c-98af-ff210df25b04" />
+
+## Video demonstrativo
+[Clique aqui para assistir ao vídeo](https://drive.google.com/file/d/1zGGhQKhfJAcP_CgwSsalqpIccIkMHaHU/preview)
