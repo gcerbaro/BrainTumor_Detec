@@ -1,25 +1,23 @@
+from env import *
 import numpy as np
-import keras
 from flask import Flask, request, jsonify
 from werkzeug.datastructures import FileStorage
+from model import load_model, MODEL_NAME
 from image_utils import load_img, preprocess_img
-import os
+from utils import log_info, log_error, log_success
+from flask_cors import CORS
 
 app = Flask(__name__)
-
-model_filename = 'brain_tumor_model.keras'
-model_filepath = os.path.join(os.getcwd(), model_filename)
+CORS(app)
 
 # Carrega o modelo treinado
 try:
-    print(f"Carregando modelo '{model_filename}'...")
-    print(f"  - {model_filepath}")
-    model = keras.models.load_model(model_filepath)
-    print(f"Modelo '{model_filename}' carregado com sucesso.")
+    log_info(f"Carregando modelo '{MODEL_NAME}'...")
+    model = load_model()
+    log_success(f"Modelo '{MODEL_NAME}' carregado com sucesso.")
 except Exception as e:
-    print(f"Erro ao carregar o modelo: {e}")
-    print(f"Certifique-se de que '{model_filename}' está na mesma pasta.")
-    model = None
+    log_error(f"Erro ao carregar o modelo: {e}")
+    exit(1)
 
 def load_image_file(file_stream: FileStorage):
     """
@@ -27,14 +25,11 @@ def load_image_file(file_stream: FileStorage):
     e prepara a imagem para o modelo.
     """
     
-    # Converte o file stream em um array numpy
     filestr = file_stream.read()
     npimg = np.frombuffer(filestr, np.uint8)
     img = load_img(npimg)
     img = preprocess_img(img)
     return img
-
-# --- 3. Definição do Endpoint da API ---
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -44,14 +39,17 @@ def predict():
     if 'files' not in request.files:
         return jsonify({"erro": "Nenhum arquivo enviado. Use a chave 'files'."}), 400
 
-    # Pega a lista de arquivos enviados (suporta múltiplos)
     files = request.files.getlist("files")
+
+    log_info(f"Nova requisição para {len(files)} imagens")
     
-    results = [] # Lista para armazenar os resultados
+    results = []
 
     for file in files:
+        log_info(f"  - {file.filename}")
+
         if file.filename == '':
-            continue # Pula arquivos vazios
+            continue
 
         try:
             # Prepara a imagem
@@ -62,6 +60,8 @@ def predict():
             
             # Formata o resultado
             prob = float(prediction[0][0])
+
+            log_info(f"  - Predição: {prob}")
 
             results.append({
                 "filename": file.filename,

@@ -1,6 +1,7 @@
 #---------------------------#
 # Constantes                #
 #---------------------------#
+MODEL_NAME =  'brain_mri_model'
 IMAGE_SIZE = 224
 BATCH_SIZE = 16
 EPOCHS = 25
