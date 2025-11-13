@@ -61,7 +61,7 @@ const onSubmit = async (event: FormSubmitEvent<schema>) => {
   }
 };
 
-const treshold = ref(0.5);
+const tresholds = reactive<[number, number, number]>([0.05, 0.3, 0.95]);
 </script>
 
 <template>
@@ -119,15 +119,15 @@ const treshold = ref(0.5);
             />
 
             <template #content>
-              <div class="p-4">
+              <div class="p-4 space-y-8">
                 <UFormField
+                  v-for="(treshold, i) in tresholds"
+                  :key="i"
                   name="treshold"
-                  :label="`Probabilidade limite (${(treshold * 100).toFixed(
-                    0
-                  )}%)`"
+                  :label="`Limite ${i + 1} (${(treshold * 100).toFixed(0)}%)`"
                 >
                   <USlider
-                    v-model="treshold"
+                    v-model="tresholds[i]"
                     class="w-64"
                     :min="0.01"
                     :max="1"
@@ -167,7 +167,7 @@ const treshold = ref(0.5);
           <ImageResult
             v-for="data in submission.results"
             :key="data.image.name"
-            :treshold="treshold"
+            :tresholds="tresholds"
             :data="data"
           />
         </template>

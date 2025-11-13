@@ -31,6 +31,10 @@ client:
 	@echo "Iniciando cliente (frontend)..."
 	$(PYTHON) -m http.server 3000 -d ./client/latest
 
+client-dev:
+	@echo "Iniciando cliente em modo de desenvolvimento..."
+	cd client && pnpm dev
+
 clean:
 	@echo "Limpando cache da API..."
 	@rm -rf .cache

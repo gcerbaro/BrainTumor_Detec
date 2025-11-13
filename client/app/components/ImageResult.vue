@@ -7,9 +7,9 @@ export interface ImageResultData {
 </script>
 
 <script setup lang="ts">
-const { data, treshold = 0.5 } = defineProps<{
+const { data, tresholds = [0.05, 0.3, 0.95] } = defineProps<{
   data: ImageResultData;
-  treshold?: number;
+  tresholds?: [number, number, number];
 }>();
 
 const src = computed(() => URL.createObjectURL(data.image));
@@ -26,9 +26,27 @@ onBeforeUnmount(() => {
   revoke(src.value);
 });
 
-const isDetected = computed(
-  () => data.prob != undefined && data.prob >= treshold
-);
+const color = computed(() => {
+  if (data.prob == undefined) return "neutral";
+  if (data.prob < tresholds[0]) return "success";
+  if (data.prob < tresholds[1]) return "info";
+  if (data.prob < tresholds[2]) return "warning";
+  return "error";
+});
+
+const icon = computed(() => {
+  if (data.prob == undefined) return "";
+  if (data.prob < tresholds[1]) return "material-symbols-check";
+  return "material-symbols-warning-outline";
+});
+
+const title = computed(() => {
+  if (data.prob == undefined) return "Carregando...";
+  if (data.prob < tresholds[0]) return "Nenhum tumor detectado";
+  if (data.prob < tresholds[1]) return "Fracos indícios de tumor detectado";
+  if (data.prob < tresholds[2]) return "Possível tumor detectado";
+  return "Tumor detectado";
+});
 
 const accuracyFormatted = computed(() =>
   data.prob === undefined ? "Carregando..." : `${(data.prob * 100).toFixed(2)}%`
@@ -51,24 +69,18 @@ const accuracyFormatted = computed(() =>
     </div>
 
     <template #footer>
-      <UProgress v-if="data == undefined" color="neutral" />
+      <UProgress v-if="data.prob == undefined" color="neutral" />
       <UAlert
-        v-else-if="isDetected"
-        color="warning"
-        icon="material-symbols-warning"
-        :title="`Possível tumor detectado (${accuracyFormatted})`"
-      />
-      <UAlert
-        v-else-if="!data.error"
-        color="success"
-        icon="material-symbols-check"
-        :title="`Tumor não detectado (${accuracyFormatted})`"
-      />
-      <UAlert
-        v-else
+        v-else-if="data.error"
         color="error"
         icon="material-symbols-error-circle-rounded-outline-sharp"
         :title="String(data.error)"
+      />
+      <UAlert
+        v-else
+        :color="color"
+        :icon="icon"
+        :title="`${title} (${accuracyFormatted})`"
       />
     </template>
   </UCard>
